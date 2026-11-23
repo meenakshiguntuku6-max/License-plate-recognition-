@@ -1,0 +1,42 @@
+import cv2
+import pytesseract
+
+# Load image
+image = cv2.imread("car.jpg")
+
+# Convert image to grayscale
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Load license plate cascade file
+plate_cascade = cv2.CascadeClassifier(
+    "haarcascade_russian_plate_number.xml"
+)
+
+# Detect license plates
+plates = plate_cascade.detectMultiScale(
+    gray, 1.1, 4
+)
+
+for (x, y, w, h) in plates:
+
+    # Draw rectangle around plate
+    cv2.rectangle(
+        image, (x, y), (x+w, y+h),
+        (0, 255, 0), 2
+    )
+
+    # Crop plate region
+    plate = gray[y:y+h, x:x+w]
+
+    # Read plate text
+    text = pytesseract.image_to_string(
+        plate, config="--psm 7"
+    )
+
+    print("License Plate:", text.strip())
+
+# Display result
+cv2.imshow("License Plate Recognition", image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
